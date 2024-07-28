@@ -28,6 +28,7 @@ SOFTWARE.
 #include <QtCore>
 #include <QtGui>
 #include <QtWidgets>
+#include "common.h"
 #include "intcommon.h"
 #include "qgoodstateholder.h"
 #include "lightstyle.h"
