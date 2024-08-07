@@ -43,6 +43,7 @@ SOFTWARE.
 class MainWindow : public QGoodWindow
 {
     Q_OBJECT
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -61,6 +62,7 @@ private:
     void closeEvent(QCloseEvent *event);
 
     //Variables
+    //bool m_isFullScreenMode = false;
     QGoodCentralWidget *m_good_central_widget;
     QPointer<QQuickWidget> m_quick_widget;
     QHash<QString, QString> m_pix_str_hash;
