@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include "mainwindow.h"
+#include "AppWindowManager.h"
 
 MainWindow::MainWindow(QWidget *parent) : QGoodWindow(parent, QColor("#303030"))
 {
@@ -51,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent) : QGoodWindow(parent, QColor("#303030"))
         m_quick_widget->rootObject()->setProperty("windowTitle", title);
     });
 
+    qmlRegisterType<AppWindowManager>("AppWindowManager", 1, 0, "AppWindowManager");
+
     connect(this, &QGoodWindow::windowIconChanged, this, [=](const QIcon &icon){
         if (!m_quick_widget)
             return;
@@ -71,24 +74,14 @@ MainWindow::MainWindow(QWidget *parent) : QGoodWindow(parent, QColor("#303030"))
 
     QGoodWindow::setAppDarkTheme();
     setNativeDarkModeEnabledOnWindows(true);
+
 #endif
-
-    QShortcut *shortcut1 = new QShortcut(QKeySequence(Qt::Key_F), this);
-
-    connect(shortcut1, &QShortcut::activated, this, [=]{
-        if (!isFullScreen())
-            showFullScreen();
-        else
-            showNormal();
-    });
 
     m_good_central_widget->setCentralWidget(m_quick_widget);
     setCentralWidget(m_good_central_widget);
 
-    QPixmap p = QPixmap(1, 1);
-    p.fill(Qt::red);
-
-    setWindowIcon(p);
+    // It will show "Qt" icon
+    setWindowIcon(qApp->style()->standardIcon(QStyle::SP_TitleBarMenuButton));
     setWindowTitle("Good Window - Press F to toggle fullscreen!");
 
     resize(640, 480);
@@ -363,6 +356,7 @@ bool MainWindow::event(QEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    /*
     QMessageBox msgbox(this);
     msgbox.setIcon(QMessageBox::Question);
     msgbox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -373,4 +367,5 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     if (result != QMessageBox::Yes)
         event->ignore();
+        */
 }

@@ -50,6 +50,8 @@ add_executable(${PROJECT_NAME}
     main.cpp
     mainwindow.cpp mainwindow.h
     qml.qrc
+    AppWindowManager.h
+    AppWindowManager.cpp
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../QGoodWindow/QGoodWindow.cmake)
@@ -71,6 +73,12 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
     Gui
     Widgets
     QuickWidgets
+)
+
+qt_add_qml_module(${PROJECT_NAME}
+        URI appWindowManager
+        VERSION 1.0
+        SOURCES AppWindowManager.h AppWindowManager.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

@@ -22,8 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import QtQuick 2.3
-import QtQuick.Window 2.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
+import appWindowManager
 
 Rectangle
 {
@@ -106,6 +108,19 @@ Rectangle
         }
     }
 
+    Shortcut {
+        sequence: "F"
+        onActivated: appWindowManager.toggleFullScreen()
+    }
+
+    AppWindowManager {
+        id: appWindowManager
+
+        function toggleFullScreen() {
+            isFullScreenMode = !isFullScreenMode;
+        }
+    }
+
     Column
     {
         anchors.fill: parent
@@ -115,7 +130,7 @@ Rectangle
             id: titlebar
             color: "#222222"
             width: parent.width
-            height: 30
+            height: appWindowManager.titleBarHeight
             z: 1
             visible: isTitleBarVisible
 
@@ -124,7 +139,7 @@ Rectangle
                 id: windowIconRect
                 x: 0
                 y: 0
-                width: 30
+                width: appWindowManager.titleBarHeight
                 height: parent.height
                 color: "transparent"
 
@@ -132,10 +147,35 @@ Rectangle
                 {
                     id: windowIconImage
                     anchors.centerIn: parent
-                    width: 16
-                    height: 16
+                    width: appWindowManager.smallIconSize
+                    height: appWindowManager.smallIconSize
                     smooth: true
                     source: isTitleBarVisible ? (isActive ? windowIcon : windowIconGrayed) : ""
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    onClicked: {
+                        console.info("OnClicked context menu")
+                        windowMenu.popup()
+                    }
+                }
+
+                Menu {
+                    id: windowMenu
+                    MenuItem {
+                        text: "Restore"
+                    }
+                    MenuItem {
+                        text: "Minimize"
+                    }
+                    MenuItem {
+                        text: "Maximize"
+                    }
+                    MenuItem {
+                        text: "Close"
+                    }
                 }
             }
 
@@ -191,27 +231,35 @@ Rectangle
             }
         }
 
-        Rectangle
+        Page
         {
             id: contents
-            color: "transparent"
-            y: (titlebar.visible ? titlebar.height : 0)
+            background: Rectangle {
+                anchors.fill: parent
+            }
+
             width: parent.width
             height: parent.height - (titlebar.visible ? titlebar.height : 0)
 
-            Rectangle
-            {
-                color: "green"
-                width: Math.min(parent.width, parent.height) / 2
-                height: Math.min(parent.width, parent.height) / 2
-                anchors.centerIn: parent
+            Rectangle {
+                id: bigButton
+                color: "#00FF00"
+                anchors.margins: 30
+                anchors.fill: parent
 
-                RotationAnimation on rotation
-                {
-                    loops: Animation.Infinite
-                    duration: 1000
-                    from: 0
-                    to: 360
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        appWindowManager.toggleFullScreen()
+                    }
+                }
+            }
+
+            Connections {
+                target: appWindowManager
+
+                function onIsFullScreenModeChanged(result) {
+                    bigButton.color = result ? "#FF0000" : "#00FF00"
                 }
             }
         }
