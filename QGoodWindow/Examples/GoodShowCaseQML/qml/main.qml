@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Window
 import appWindowManager
@@ -128,69 +129,60 @@ Rectangle
         Rectangle
         {
             id: titlebar
+            objectName: "titlebar"
             color: "#222222"
             width: parent.width
             height: appWindowManager.titleBarHeight
             z: 1
             visible: isTitleBarVisible
 
-            Rectangle
-            {
-                id: windowIconRect
-                x: 0
-                y: 0
-                width: appWindowManager.titleBarHeight
-                height: parent.height
-                color: "transparent"
-
-                Image
-                {
-                    id: windowIconImage
-                    anchors.centerIn: parent
+            RowLayout {
+                anchors.left: parent.left
+                spacing: 3
+                height: appWindowManager.smallIconSize
+                ToolButton {
+                    id: windowIconButton
+                    objectName: "windowIconButton"
                     width: appWindowManager.smallIconSize
-                    height: appWindowManager.smallIconSize
-                    smooth: true
-                    source: isTitleBarVisible ? (isActive ? windowIcon : windowIconGrayed) : ""
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
+                    height: parent.height
+                    icon.source: isTitleBarVisible ? (isActive ? windowIcon : windowIconGrayed) : ""
+                    containmentMask: Rectangle {
+                        x: 0
+                        y: 0
+                        width: windowIconButton.width
+                        height: windowIconButton.height
+                    }
                     onClicked: {
-                        console.info("OnClicked context menu")
-                        windowMenu.popup()
+                        console.info("ToolButton.onClicked")
+                        windowMenu.open()
+                    }
+
+                    Menu {
+                        id: windowMenu
+                        MenuItem {
+                            text: "Restore"
+                        }
+                        MenuItem {
+                            text: "Minimize"
+                        }
+                        MenuItem {
+                            text: "Maximize"
+                        }
+                        MenuItem {
+                            text: "Close"
+                        }
                     }
                 }
-
-                Menu {
-                    id: windowMenu
-                    MenuItem {
-                        text: "Restore"
-                    }
-                    MenuItem {
-                        text: "Minimize"
-                    }
-                    MenuItem {
-                        text: "Maximize"
-                    }
-                    MenuItem {
-                        text: "Close"
-                    }
+                Text
+                {
+                    id: windowTitleText
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter && Qt.AlignVCenter
+                    color: isActive ? windowTitle.color = "#FFFFFF" : windowTitle.color = "#AAAAAA"
+                    elide: Text.ElideRight
+                    text: windowTitle
                 }
-            }
 
-            Text
-            {
-                id: windowTitleText
-                x: windowIconRect.width
-                y: 0
-                anchors.left: windowIconRect.right
-                anchors.right: minBtn.left
-                anchors.verticalCenter: parent.verticalCenter
-                verticalAlignment: Qt.AlignCenter
-                color: isActive ? windowTitle.color = "#FFFFFF" : windowTitle.color = "#AAAAAA"
-                elide: Text.ElideRight
-                text: windowTitle
             }
 
             CaptionButton

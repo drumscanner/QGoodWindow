@@ -25,11 +25,65 @@ SOFTWARE.
 #include "mainwindow.h"
 #include "AppWindowManager.h"
 
+void dumpObject(QObject * object)
+{
+    qDebug() << "Object Class name: " << object->metaObject()->className();
+    qDebug() << "\tobject x: "
+            << QQmlProperty::read(object, "x").toInt();
+    qDebug() << "\tobject y: "
+            << QQmlProperty::read(object, "y").toInt();
+    qDebug() << "\tobject width: "
+            << QQmlProperty::read(object, "width").toInt();
+    qDebug() << "\tobject height: "
+            << QQmlProperty::read(object, "height").toInt();
+}
+
+void dumpTitle(QObject * qw)
+{
+    const QObjectList& list = qw->children();
+    for (QObject * w : list)
+    {
+        qDebug() << "Class name: " << w->metaObject()->className();
+        if (w->metaObject()->className() == QStringLiteral("QQmlComponent"))
+        {
+            auto * comp = qobject_cast<QQmlComponent *>(w);
+            if (comp->status() == QQmlComponent::Ready)
+            {
+                QObject * qmlObject = comp->create();
+                auto * title = qmlObject->findChild<QObject *>(QString("titlebar"));
+                if (title != nullptr)
+                {
+                    dumpObject(title);
+                    for (auto * tc: title->children())
+                    {
+                        dumpObject(tc);
+                        for (auto * p: tc->children())
+                        {
+                            dumpObject(p);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 MainWindow::MainWindow(QWidget *parent) : QGoodWindow(parent, QColor("#303030"))
 {
     m_good_central_widget = new QGoodCentralWidget(this);
 
+
     m_quick_widget = new QQuickWidget(this);
+
+    connect(m_quick_widget, &QQuickWidget::statusChanged, [&](const QQuickWidget::Status status)
+    {
+        if (status == QQuickWidget::Ready)
+        {
+            dumpTitle(m_quick_widget);
+        }
+    });
+
     m_quick_widget->setResizeMode(QQuickWidget::SizeRootObjectToView);
     m_quick_widget->rootContext()->setContextObject(this);
     m_quick_widget->setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
@@ -69,6 +123,7 @@ MainWindow::MainWindow(QWidget *parent) : QGoodWindow(parent, QColor("#303030"))
 
     connect(this, &QGoodWindow::captionButtonStateChanged,
             this, &MainWindow::captionButtonStateChangedPrivate);
+
 
     qGoodStateHolder->setCurrentThemeDark(true);
 
@@ -285,6 +340,8 @@ bool MainWindow::event(QEvent *event)
     {
         if (isFullScreen())
             break;
+        //qDebug() << "Resize event";
+        //dumpTitle(m_quick_widget);
 
         QTimer::singleShot(0, this, [=]{
             QRect rect = titleBarRect();
@@ -292,6 +349,10 @@ bool MainWindow::event(QEvent *event)
             QRegion min_mask = rect.adjusted(rect.width() - 30 * 3, -30 * 2, 0, 0);
             QRegion max_mask = rect.adjusted(rect.width() - 30 * 2, -30, 0, 0);
             QRegion cls_mask = rect.adjusted(rect.width() - 30, 0, 0, 0);
+            qDebug() << "Title rect: " << rect;
+            qDebug() << "min_mask: " << min_mask;
+            qDebug() << "max_mask: " << max_mask;
+            qDebug() << "cls_mask: " << cls_mask;
 
             QPainterPath path;
             path.addRoundedRect(5, 5, 20, 20, 20, 20);
@@ -312,6 +373,10 @@ bool MainWindow::event(QEvent *event)
             setMinimizeMask(min_mask);
             setMaximizeMask(max_mask);
             setCloseMask(cls_mask);
+
+            qDebug() << "min_mask: " << min_mask;
+            qDebug() << "max_mask: " << max_mask;
+            qDebug() << "cls_mask: " << cls_mask;
         });
 
         break;
@@ -356,16 +421,4 @@ bool MainWindow::event(QEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    /*
-    QMessageBox msgbox(this);
-    msgbox.setIcon(QMessageBox::Question);
-    msgbox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgbox.setDefaultButton(QMessageBox::No);
-    msgbox.setText("Are you sure to close?");
-
-    int result = QGoodCentralWidget::execDialogWithWindow(&msgbox, this, m_good_central_widget);
-
-    if (result != QMessageBox::Yes)
-        event->ignore();
-        */
 }

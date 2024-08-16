@@ -73,6 +73,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
     Gui
     Widgets
     QuickWidgets
+    QuickControls2
 )
 
 qt_add_qml_module(${PROJECT_NAME}
@@ -86,4 +87,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::QuickWidgets
+    Qt${QT_VERSION_MAJOR}::QuickControls2
 )
